@@ -1,7 +1,6 @@
 package main
 
 import (
-	"advent-of-code-go/cast"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -57,6 +56,29 @@ func part1(input string) int {
 	parsed := parseInput(input)
 	_ = parsed
 
+	for i, pattern := range parsed {
+		_ = i
+		for j, row := range pattern {
+			_ = j
+
+			for k, char := range row {
+				_ = char
+
+				if k == 0 {
+					continue
+				}
+
+				nextChar := row[k-1]
+				_ = nextChar
+
+			}
+
+		}
+	}
+
+	// To find the reflection in each pattern, you need to find a perfect reflection
+	// across either a horizontal line between two rows or across a vertical line between two columns.
+
 	return 0
 }
 
@@ -64,9 +86,20 @@ func part2(input string) int {
 	return 0
 }
 
-func parseInput(input string) (ans []int) {
-	for _, line := range strings.Split(input, "\n") {
-		ans = append(ans, cast.ToInt(line))
+func parseInput(input string) (ans [][][]string) {
+
+	patterns := strings.Split(input, "\n\n")
+
+	processedPatterns := make([][][]string, len(patterns))
+	for i, pattern := range patterns {
+		rows := strings.Split(pattern, "\n")
+		processedPatterns[i] = make([][]string, len(rows))
+
+		for j, row := range rows {
+			processedPatterns[i][j] = strings.Split(row, "")
+		}
+
 	}
-	return ans
+
+	return processedPatterns
 }
