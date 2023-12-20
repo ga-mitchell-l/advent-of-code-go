@@ -54,32 +54,69 @@ func main() {
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	_ = parsed
 
-	for i, pattern := range parsed {
-		_ = i
-		for j, row := range pattern {
-			_ = j
+	for _, pattern := range parsed {
 
-			for k, char := range row {
-				_ = char
+		transposedPattern := util.Transpose(pattern)
 
-				if k == 0 {
-					continue
-				}
+		verticalMirrors := getVerticalMirrors(pattern)
+		horizontalMirrors := getVerticalMirrors(transposedPattern)
 
-				nextChar := row[k-1]
-				_ = nextChar
-
-			}
-
-		}
+		fmt.Println(verticalMirrors)
+		fmt.Println(horizontalMirrors)
 	}
 
 	// To find the reflection in each pattern, you need to find a perfect reflection
 	// across either a horizontal line between two rows or across a vertical line between two columns.
 
 	return 0
+}
+
+func getVerticalMirrors(pattern [][]string) []int {
+	firstRow := pattern[0]
+	var possibleMirrors []int
+
+	for k, _ := range firstRow {
+		if k == len(firstRow)-1 {
+			continue
+		}
+
+		mirror := isColumnMirror(k, firstRow)
+		if mirror {
+			possibleMirrors = append(possibleMirrors, k)
+		}
+	}
+
+	for rowIndex := 1; rowIndex < len(pattern); rowIndex++ {
+		var notMirrors []int
+		for mirrorIndex := 0; mirrorIndex < len(possibleMirrors); mirrorIndex++ {
+
+			mirror := isColumnMirror(possibleMirrors[mirrorIndex], pattern[rowIndex])
+
+			if !mirror {
+				notMirrors = append(notMirrors, possibleMirrors[mirrorIndex])
+			}
+		}
+
+		for _, notMirror := range notMirrors {
+			index := util.SliceIndex(len(possibleMirrors), func(i int) bool { return possibleMirrors[i] == notMirror })
+			possibleMirrors = util.Remove(possibleMirrors, index)
+		}
+	}
+	return possibleMirrors
+}
+
+func isColumnMirror(k int, firstRow []string) bool {
+	mirrorLeftIndex := k
+	mirrorRightIndex := k + 1
+	mirror := firstRow[mirrorLeftIndex] == firstRow[mirrorRightIndex]
+
+	for mirrorLeftIndex > 0 && mirrorRightIndex < len(firstRow)-1 && mirror {
+		mirrorLeftIndex--
+		mirrorRightIndex++
+		mirror = firstRow[mirrorLeftIndex] == firstRow[mirrorRightIndex]
+	}
+	return mirror
 }
 
 func part2(input string) int {
