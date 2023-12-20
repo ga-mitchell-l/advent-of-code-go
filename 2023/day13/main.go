@@ -55,21 +55,29 @@ func main() {
 func part1(input string) int {
 	parsed := parseInput(input)
 
+	result := 0
 	for _, pattern := range parsed {
-
 		transposedPattern := util.Transpose(pattern)
 
 		verticalMirrors := getVerticalMirrors(pattern)
 		horizontalMirrors := getVerticalMirrors(transposedPattern)
 
-		fmt.Println(verticalMirrors)
-		fmt.Println(horizontalMirrors)
+		pvsum := 0
+		// add up the number of columns to the left of each vertical line of reflection
+		for _, val := range verticalMirrors {
+			pvsum += val + 1
+		}
+
+		//  also add 100 multiplied by the number of rows above each horizontal line of reflection
+		phsum := 0
+		for _, val := range horizontalMirrors {
+			phsum += 100 * (val + 1)
+		}
+		result += pvsum + phsum
+
 	}
 
-	// To find the reflection in each pattern, you need to find a perfect reflection
-	// across either a horizontal line between two rows or across a vertical line between two columns.
-
-	return 0
+	return result
 }
 
 func getVerticalMirrors(pattern [][]string) []int {
