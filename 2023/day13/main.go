@@ -62,8 +62,8 @@ func part1(input string) int {
 		verticalMirrors := getVerticalMirrors(pattern)
 		horizontalMirrors := getVerticalMirrors(transposedPattern)
 
-		pvsum := 0
 		// add up the number of columns to the left of each vertical line of reflection
+		pvsum := 0
 		for _, val := range verticalMirrors {
 			pvsum += val + 1
 		}
@@ -76,6 +76,9 @@ func part1(input string) int {
 		result += pvsum + phsum
 
 	}
+
+	// To find the reflection in each pattern, you need to find a perfect reflection
+	// across either a horizontal line between two rows or across a vertical line between two columns.
 
 	return result
 }
@@ -128,7 +131,60 @@ func isColumnMirror(k int, firstRow []string) bool {
 }
 
 func part2(input string) int {
-	return 0
+	parsed := parseInput(input)
+	result := 0
+
+	// pattern := parsed[1]
+	// patternMirrors := getMirrorsByPattern(pattern)
+	// fmt.Println(patternMirrors)
+
+	for _, pattern := range parsed {
+		transposedPattern := util.Transpose(pattern)
+		patternMirrors := getMirrorsByPattern(pattern)
+		transposedPatternMirrors := getMirrorsByPattern(transposedPattern)
+
+		// add up the number of columns to the left of each vertical line of reflection
+		pvsum := 0
+		for _, val := range patternMirrors {
+			pvsum += val + 1
+		}
+
+		//  also add 100 multiplied by the number of rows above each horizontal line of reflection
+		phsum := 0
+		for _, val := range transposedPatternMirrors {
+			phsum += 100 * (val + 1)
+		}
+		result += pvsum + phsum
+
+	}
+
+	return result
+}
+
+func getMirrorsByPattern(pattern [][]string) []int {
+	var patternMirrors []int
+	patternMirrorSet := make(map[int]int)
+	rowCount := len(pattern)
+
+	for _, row := range pattern {
+		for k, _ := range row {
+			if k == len(row)-1 {
+				continue
+			}
+
+			mirror := isColumnMirror(k, row)
+			if mirror {
+				patternMirrorSet[k] += 1
+			}
+		}
+	}
+
+	for mirrorColumnIndex, count := range patternMirrorSet {
+		if count == rowCount-1 {
+			patternMirrors = append(patternMirrors, mirrorColumnIndex)
+		}
+	}
+	return patternMirrors
 }
 
 func parseInput(input string) (ans [][][]string) {
@@ -143,7 +199,6 @@ func parseInput(input string) (ans [][][]string) {
 		for j, row := range rows {
 			processedPatterns[i][j] = strings.Split(row, "")
 		}
-
 	}
 
 	return processedPatterns
