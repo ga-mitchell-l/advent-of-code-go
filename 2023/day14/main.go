@@ -58,9 +58,7 @@ func main() {
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	_ = parsed
-
-	movedRocks := moveRocks(parsed)
+	movedRocks := moveRocks(parsed, 1)
 	result := calculateLoad(movedRocks)
 
 	return result
@@ -78,34 +76,56 @@ func calculateLoad(movedRocks [][]string) int {
 	return result
 }
 
-func moveRocks(parsed [][]string) [][]string {
+func moveRocks(parsed [][]string, direction int) [][]string {
 	movedRocks := util.CopySlice(parsed)
-	for rowIndex, row := range movedRocks {
-		if rowIndex == 0 {
+
+	for rowIndex, _ := range movedRocks {
+		if (rowIndex == 0 && direction > 0) || (rowIndex == len(movedRocks) && direction < 0) {
 			continue
 		}
+
+		var workingRowIndex int
+		if direction > 0 {
+			workingRowIndex = rowIndex
+		}
+		if direction < 0 {
+			workingRowIndex = len(parsed) - rowIndex - 1
+		}
+
+		row := parsed[workingRowIndex]
 
 		for columnIndex, column := range row {
 			if column != roundRock {
 				continue
 			}
 
-			movedRocks[rowIndex][columnIndex] = space
+			movedRocks[workingRowIndex][columnIndex] = space
 
 			block := false
-			slideIndex := rowIndex
+			slideIndex := workingRowIndex
 			for block != true {
-				slideIndex--
-				block = slideIndex == -1 || movedRocks[slideIndex][columnIndex] != space
+				slideIndex += direction * -1
+				block = (slideIndex == -1 && direction > 0) || (slideIndex == len(movedRocks) && direction < 0) || movedRocks[slideIndex][columnIndex] != space
 			}
 
-			movedRocks[slideIndex+1][columnIndex] = roundRock
+			movedRocks[slideIndex+direction][columnIndex] = roundRock
 		}
 	}
 	return movedRocks
 }
 
 func part2(input string) int {
+
+	parsed := parseInput(input)
+	movedRocks := moveRocks(parsed, -1)
+
+	for _, row := range parsed {
+		fmt.Println(strings.Join(row, ""))
+	}
+	fmt.Println()
+	for _, row := range movedRocks {
+		fmt.Println(strings.Join(row, ""))
+	}
 	return 0
 }
 
