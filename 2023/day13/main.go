@@ -59,62 +59,29 @@ func part1(input string) int {
 	for _, pattern := range parsed {
 		transposedPattern := util.Transpose(pattern)
 
-		verticalMirrors := getVerticalMirrors(pattern)
-		horizontalMirrors := getVerticalMirrors(transposedPattern)
+		verticalMirrors := getMirrorsByPattern(pattern, 0)
+		horizontalMirrors := getMirrorsByPattern(transposedPattern, 0)
 
-		// add up the number of columns to the left of each vertical line of reflection
-		pvsum := 0
-		for _, val := range verticalMirrors {
-			pvsum += val + 1
-		}
-
-		//  also add 100 multiplied by the number of rows above each horizontal line of reflection
-		phsum := 0
-		for _, val := range horizontalMirrors {
-			phsum += 100 * (val + 1)
-		}
-		result += pvsum + phsum
-
+		result = summarizePattern(verticalMirrors, horizontalMirrors, result)
 	}
-
-	// To find the reflection in each pattern, you need to find a perfect reflection
-	// across either a horizontal line between two rows or across a vertical line between two columns.
 
 	return result
 }
 
-func getVerticalMirrors(pattern [][]string) []int {
-	firstRow := pattern[0]
-	var possibleMirrors []int
-
-	for k, _ := range firstRow {
-		if k == len(firstRow)-1 {
-			continue
-		}
-
-		mirror := isColumnMirror(k, firstRow)
-		if mirror {
-			possibleMirrors = append(possibleMirrors, k)
-		}
+func summarizePattern(verticalMirrors []int, horizontalMirrors []int, result int) int {
+	// add up the number of columns to the left of each vertical line of reflection
+	pvsum := 0
+	for _, val := range verticalMirrors {
+		pvsum += val + 1
 	}
 
-	for rowIndex := 1; rowIndex < len(pattern); rowIndex++ {
-		var notMirrors []int
-		for mirrorIndex := 0; mirrorIndex < len(possibleMirrors); mirrorIndex++ {
-
-			mirror := isColumnMirror(possibleMirrors[mirrorIndex], pattern[rowIndex])
-
-			if !mirror {
-				notMirrors = append(notMirrors, possibleMirrors[mirrorIndex])
-			}
-		}
-
-		for _, notMirror := range notMirrors {
-			index := util.SliceIndex(len(possibleMirrors), func(i int) bool { return possibleMirrors[i] == notMirror })
-			possibleMirrors = util.Remove(possibleMirrors, index)
-		}
+	//  also add 100 multiplied by the number of rows above each horizontal line of reflection
+	phsum := 0
+	for _, val := range horizontalMirrors {
+		phsum += 100 * (val + 1)
 	}
-	return possibleMirrors
+	result += pvsum + phsum
+	return result
 }
 
 func isColumnMirror(k int, firstRow []string) bool {
@@ -134,34 +101,18 @@ func part2(input string) int {
 	parsed := parseInput(input)
 	result := 0
 
-	// pattern := parsed[1]
-	// patternMirrors := getMirrorsByPattern(pattern)
-	// fmt.Println(patternMirrors)
-
 	for _, pattern := range parsed {
 		transposedPattern := util.Transpose(pattern)
-		patternMirrors := getMirrorsByPattern(pattern)
-		transposedPatternMirrors := getMirrorsByPattern(transposedPattern)
+		verticalMirrors := getMirrorsByPattern(pattern, 1)
+		horizontalMirrors := getMirrorsByPattern(transposedPattern, 1)
 
-		// add up the number of columns to the left of each vertical line of reflection
-		pvsum := 0
-		for _, val := range patternMirrors {
-			pvsum += val + 1
-		}
-
-		//  also add 100 multiplied by the number of rows above each horizontal line of reflection
-		phsum := 0
-		for _, val := range transposedPatternMirrors {
-			phsum += 100 * (val + 1)
-		}
-		result += pvsum + phsum
-
+		result = summarizePattern(verticalMirrors, horizontalMirrors, result)
 	}
 
 	return result
 }
 
-func getMirrorsByPattern(pattern [][]string) []int {
+func getMirrorsByPattern(pattern [][]string, matchDiff int) []int {
 	var patternMirrors []int
 	patternMirrorSet := make(map[int]int)
 	rowCount := len(pattern)
@@ -180,7 +131,7 @@ func getMirrorsByPattern(pattern [][]string) []int {
 	}
 
 	for mirrorColumnIndex, count := range patternMirrorSet {
-		if count == rowCount-1 {
+		if count == rowCount-matchDiff {
 			patternMirrors = append(patternMirrors, mirrorColumnIndex)
 		}
 	}
