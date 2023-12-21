@@ -15,6 +15,10 @@ var input string
 //go:embed example1.txt
 var example1 string
 
+var roundRock = "O"
+var squareRock = "#"
+var space = "."
+
 func init() {
 	// do this in init (not main) so test file has same input
 	input = strings.TrimRight(input, "\n")
@@ -54,10 +58,51 @@ func main() {
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	fmt.Println(parsed[0])
 	_ = parsed
 
-	return 0
+	movedRocks := moveRocks(parsed)
+	result := calculateLoad(movedRocks)
+
+	return result
+}
+
+func calculateLoad(movedRocks [][]string) int {
+	filter := func(s string) bool { return s == roundRock }
+
+	result := 0
+	for index, row := range movedRocks {
+		rockCount := len(util.Filter(row, filter))
+		distanceFromN := len(movedRocks) - index
+		result += rockCount * distanceFromN
+	}
+	return result
+}
+
+func moveRocks(parsed [][]string) [][]string {
+	movedRocks := util.CopySlice(parsed)
+	for rowIndex, row := range movedRocks {
+		if rowIndex == 0 {
+			continue
+		}
+
+		for columnIndex, column := range row {
+			if column != roundRock {
+				continue
+			}
+
+			movedRocks[rowIndex][columnIndex] = space
+
+			block := false
+			slideIndex := rowIndex
+			for block != true {
+				slideIndex--
+				block = slideIndex == -1 || movedRocks[slideIndex][columnIndex] != space
+			}
+
+			movedRocks[slideIndex+1][columnIndex] = roundRock
+		}
+	}
+	return movedRocks
 }
 
 func part2(input string) int {

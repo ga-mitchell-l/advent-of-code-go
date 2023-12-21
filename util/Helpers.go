@@ -67,3 +67,13 @@ func Transpose(slice [][]string) [][]string {
 	}
 	return result
 }
+
+func CopySlice(input [][]string) [][]string {
+	copyWhole := make([][]string, len(input))
+	for index, row := range input {
+		copyRow := make([]string, len(row))
+		copy(copyRow, input[index])
+		copyWhole[index] = copyRow
+	}
+	return copyWhole
+}
