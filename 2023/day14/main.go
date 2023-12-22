@@ -4,7 +4,10 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
+
+	pcre "github.com/glenn-brown/golang-pkg-pcre/src/pkg/pcre"
 
 	"advent-of-code-go/util"
 )
@@ -114,19 +117,69 @@ func moveRocks(parsed [][]string, direction int) [][]string {
 	return movedRocks
 }
 
+func findRepeatedSequences(series string) string {
+	re, _ := pcre.Compile(`(.*)\1+`, 0)
+	matches := re.MatcherString(series, 0).GroupString(1)
+	return matches
+}
+
 func part2(input string) int {
 
 	parsed := parseInput(input)
-	movedRocks := moveRocks(parsed, -1)
+	cycles := 10000
+	cycleLoads := make([]string, 0)
 
-	for _, row := range parsed {
-		fmt.Println(strings.Join(row, ""))
+	for i := 0; i < cycles; i++ {
+		parsed = cycleRocks(parsed)
+		load := calculateLoad(parsed)
+		cycleLoads = append(cycleLoads, strconv.Itoa(load))
 	}
-	fmt.Println()
-	for _, row := range movedRocks {
-		fmt.Println(strings.Join(row, ""))
+
+	match := false
+	matchCycleLoads := cycleLoads
+	matchString := ""
+	var matchStringSplit []int
+	skipped := -1
+	for match != true && len(matchCycleLoads) > 0 {
+		skipped++
+		cycleLoadsString := strings.Join(matchCycleLoads, ",")
+		matchString = findRepeatedSequences(cycleLoadsString)
+
+		matchCycleLoads = matchCycleLoads[1:]
+		matchStringSplit = util.ConvertToIntSlice(strings.Split(matchString, ","))
+		match = len(matchStringSplit) > 1
 	}
-	return 0
+
+	fmt.Println("skipped", skipped)
+
+	var previousMatchStringSplit []int
+
+	for len(matchStringSplit) > 1 {
+		previousMatchStringSplit = matchStringSplit
+		matchString = findRepeatedSequences(matchString)
+		matchStringSplit = util.ConvertToIntSlice(strings.Split(matchString, ","))
+	}
+
+	repeatCycle := len(previousMatchStringSplit)
+	_ = repeatCycle
+	resultCycles := 1000000000
+
+	resultIndex := (resultCycles - 1 - skipped) % repeatCycle
+	result := previousMatchStringSplit[resultIndex]
+
+	return result
+}
+
+func cycleRocks(parsed [][]string) [][]string {
+	northRocks := moveRocks(parsed, 1)
+	transposedNorthRocks := util.Transpose(northRocks)
+	transposedWestRocks := moveRocks(transposedNorthRocks, 1)
+	westRocks := util.Transpose(transposedWestRocks)
+	southRocks := moveRocks(westRocks, -1)
+	transposedSouthRocks := util.Transpose(southRocks)
+	transposedEastRocks := moveRocks(transposedSouthRocks, -1)
+	eastRocks := util.Transpose(transposedEastRocks)
+	return eastRocks
 }
 
 func parseInput(input string) (ans [][]string) {
