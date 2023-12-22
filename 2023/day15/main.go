@@ -91,6 +91,10 @@ func part2(input string) int {
 	boxes := getBoxes(parsed)
 
 	fmt.Println(boxes)
+
+	focusingPower := 0
+	_ = focusingPower
+
 	return 0
 }
 
@@ -103,7 +107,11 @@ func getBoxes(parsed []string) map[int][]Lense {
 
 		if len(dash) > 1 {
 			box, newBoxContents := getDashBoxContents(dash, boxes)
-			boxes[box] = newBoxContents
+			if len(newBoxContents) == 0 {
+				delete(boxes, box)
+			} else {
+				boxes[box] = newBoxContents
+			}
 		}
 		if len(equals) > 1 {
 			box, newBoxContents := getEqualsBoxContents(equals, boxes)
