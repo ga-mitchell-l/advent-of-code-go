@@ -150,8 +150,6 @@ func part2(input string) int {
 		match = len(matchStringSplit) > 1
 	}
 
-	fmt.Println("skipped", skipped)
-
 	var previousMatchStringSplit []int
 
 	for len(matchStringSplit) > 1 {
