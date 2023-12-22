@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"advent-of-code-go/util"
@@ -80,8 +81,80 @@ func getInitialisationStep(input string) int {
 	return result
 }
 
+type Lense struct {
+	focalLength int
+	label       string
+}
+
 func part2(input string) int {
+	parsed := parseInput(input)
+	boxes := getBoxes(parsed)
+
+	fmt.Println(boxes)
 	return 0
+}
+
+func getBoxes(parsed []string) map[int][]Lense {
+	boxes := make(map[int][]Lense)
+
+	for _, value := range parsed {
+		equals := strings.Split(value, "=")
+		dash := strings.Split(value, "-")
+
+		if len(dash) > 1 {
+			box, newBoxContents := getDashBoxContents(dash, boxes)
+			boxes[box] = newBoxContents
+		}
+		if len(equals) > 1 {
+			box, newBoxContents := getEqualsBoxContents(equals, boxes)
+			boxes[box] = newBoxContents
+		}
+	}
+	return boxes
+}
+
+func getEqualsBoxContents(equals []string, boxes map[int][]Lense) (int, []Lense) {
+	label := equals[0]
+	focalLength, _ := strconv.Atoi(equals[1])
+
+	lense := Lense{
+		focalLength,
+		label,
+	}
+
+	box := getInitialisationStep(label)
+	currentBoxContents := boxes[box]
+
+	filter := func(s Lense) bool { return s.label == label }
+	matchingLensesInBox := util.Filter(currentBoxContents, filter)
+	if len(matchingLensesInBox) == 0 {
+		currentBoxContents = append(currentBoxContents, lense)
+	} else {
+		for index, val := range currentBoxContents {
+			if val.label == label {
+				val.focalLength = focalLength
+			}
+			currentBoxContents[index] = val
+		}
+	}
+	return box, currentBoxContents
+}
+
+func getDashBoxContents(dash []string, boxes map[int][]Lense) (int, []Lense) {
+	label := dash[0]
+	box := getInitialisationStep(label)
+
+	currentBoxContents := boxes[box]
+	newBoxContents := currentBoxContents
+	for index, value := range currentBoxContents {
+		_ = index
+		_ = value
+
+		if value.label == label {
+			newBoxContents = append(currentBoxContents[:index], currentBoxContents[index+1:]...)
+		}
+	}
+	return box, newBoxContents
 }
 
 func parseInput(input string) (ans []string) {
