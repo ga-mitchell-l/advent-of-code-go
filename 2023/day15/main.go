@@ -59,15 +59,24 @@ func main() {
 }
 
 func part1(input string) int {
-	result := 0
 
+	parsed := parseInput(input)
+	result := 0
+	for _, value := range parsed {
+		result += getInitialisationStep(value)
+	}
+
+	return result
+}
+
+func getInitialisationStep(input string) int {
+	result := 0
 	for i := 0; i < len(input); i++ {
 		ascii := int(input[i])
 		result += ascii
 		result = result * 17
 		result = result % 256
 	}
-
 	return result
 }
 
@@ -76,5 +85,5 @@ func part2(input string) int {
 }
 
 func parseInput(input string) (ans []string) {
-	return strings.Split(input, "")
+	return strings.Split(input, ",")
 }
