@@ -1,10 +1,10 @@
 package main
 
 import (
-	"advent-of-code-go/cast"
 	_ "embed"
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"advent-of-code-go/util"
@@ -15,6 +15,8 @@ var input string
 
 //go:embed example1.txt
 var example1 string
+
+var emptySpace, upMirror, downMirror, vertSplit, horizSplit = ".", "/", "\\", "|", "-"
 
 func init() {
 	// do this in init (not main) so test file has same input
@@ -53,20 +55,142 @@ func main() {
 	}
 }
 
+type Beam struct {
+	row       int
+	column    int
+	direction string
+}
+
 func part1(input string) int {
 	parsed := parseInput(input)
 	_ = parsed
 
-	return 0
+	rowCount := len(parsed)
+	columnCount := len(parsed[0])
+
+	beam := Beam{
+		row:       0,
+		column:    0,
+		direction: "E",
+	}
+	startingBeams := make([]Beam, 0)
+	startingBeams = append(startingBeams, beam)
+
+	energisedTiles := make(map[string]bool)
+	for len(startingBeams) > 0 {
+		fmt.Println("-------")
+		fmt.Println("starting beams", startingBeams)
+		currentBeam := startingBeams[0]
+		startingBeams = startingBeams[1:]
+
+		stop := false
+
+		for currentBeam.row >= 0 && currentBeam.row < rowCount &&
+			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop {
+			currentTile := parsed[currentBeam.row][currentBeam.column]
+			tileIndex := strings.Join([]string{strconv.Itoa(currentBeam.row), strconv.Itoa(currentBeam.column)}, ",")
+			energisedTiles[tileIndex] = true
+
+			fmt.Println("- - - ")
+			fmt.Println("tile index:", tileIndex)
+			fmt.Println("current tile:", currentTile)
+			fmt.Println("current direction", currentBeam.direction)
+
+			nextDirection := ""
+			previousBeam := currentBeam
+			switch currentBeam.direction {
+			case "N":
+				switch currentTile {
+				case emptySpace, vertSplit:
+					currentBeam.row--
+					nextDirection = currentBeam.direction
+				case upMirror:
+					nextDirection = "E"
+				case downMirror:
+					nextDirection = "W"
+				case horizSplit:
+					stop = true
+					startingBeams = splitBeam(previousBeam, startingBeams, []string{"E", "W"})
+				}
+			case "E":
+				switch currentTile {
+				case emptySpace, horizSplit:
+					currentBeam.column++
+					nextDirection = currentBeam.direction
+				case upMirror:
+					nextDirection = "N"
+				case downMirror:
+					nextDirection = "S"
+				case vertSplit:
+					stop = true
+					startingBeams = splitBeam(previousBeam, startingBeams, []string{"N", "S"})
+					fmt.Println("east split")
+				}
+			case "S":
+				switch currentTile {
+				case emptySpace, vertSplit:
+					currentBeam.row++
+					nextDirection = currentBeam.direction
+				case upMirror:
+					nextDirection = "W"
+				case downMirror:
+					nextDirection = "E"
+				case horizSplit:
+					stop = true
+					startingBeams = splitBeam(previousBeam, startingBeams, []string{"E", "W"})
+				}
+			case "W":
+				switch currentTile {
+				case emptySpace, horizSplit:
+					currentBeam.column--
+					nextDirection = currentBeam.direction
+				case upMirror:
+					nextDirection = "S"
+				case downMirror:
+					nextDirection = "N"
+				case vertSplit:
+					stop = true
+					startingBeams = splitBeam(previousBeam, startingBeams, []string{"N", "S"})
+				}
+			}
+
+			currentBeam.direction = nextDirection
+
+		}
+
+		if !stop {
+			fmt.Println("reached edge")
+		}
+	}
+
+	fmt.Println(energisedTiles)
+
+	return len(energisedTiles)
+}
+
+func splitBeam(currentBeam Beam, startingBeams []Beam, directions []string) []Beam {
+	newBeamE := Beam{
+		row:       currentBeam.row,
+		column:    currentBeam.column,
+		direction: directions[0],
+	}
+	startingBeams = append(startingBeams, newBeamE)
+	newBeamW := Beam{
+		row:       currentBeam.row,
+		column:    currentBeam.column,
+		direction: directions[1],
+	}
+	startingBeams = append(startingBeams, newBeamW)
+	return startingBeams
 }
 
 func part2(input string) int {
 	return 0
 }
 
-func parseInput(input string) (ans []int) {
+func parseInput(input string) (ans [][]string) {
 	for _, line := range strings.Split(input, "\n") {
-		ans = append(ans, cast.ToInt(line))
+		ans = append(ans, strings.Split(line, ""))
 	}
 	return ans
 }
