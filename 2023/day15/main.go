@@ -1,7 +1,6 @@
 package main
 
 import (
-	"advent-of-code-go/cast"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -15,6 +14,9 @@ var input string
 
 //go:embed example1.txt
 var example1 string
+
+//go:embed example2.txt
+var example2 string
 
 func init() {
 	// do this in init (not main) so test file has same input
@@ -39,9 +41,12 @@ func main() {
 	var tempInput string
 	if inputType == "puzzle" {
 		tempInput = input
-	} else {
+	} else if inputType == "example1" {
 		tempInput = example1
+	} else if inputType == "example2" {
+		tempInput = example2
 	}
+
 	if part == 1 {
 		ans := part1(tempInput)
 		util.CopyToClipboard(fmt.Sprintf("%v", ans))
@@ -54,19 +59,22 @@ func main() {
 }
 
 func part1(input string) int {
-	parsed := parseInput(input)
-	_ = parsed
+	result := 0
 
-	return 0
+	for i := 0; i < len(input); i++ {
+		ascii := int(input[i])
+		result += ascii
+		result = result * 17
+		result = result % 256
+	}
+
+	return result
 }
 
 func part2(input string) int {
 	return 0
 }
 
-func parseInput(input string) (ans []int) {
-	for _, line := range strings.Split(input, "\n") {
-		ans = append(ans, cast.ToInt(line))
-	}
-	return ans
+func parseInput(input string) (ans []string) {
+	return strings.Split(input, "")
 }
