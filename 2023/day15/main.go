@@ -90,12 +90,14 @@ func part2(input string) int {
 	parsed := parseInput(input)
 	boxes := getBoxes(parsed)
 
-	fmt.Println(boxes)
-
 	focusingPower := 0
-	_ = focusingPower
+	for boxIndex, box := range boxes {
+		for lenseIndex, lense := range box {
+			focusingPower += (boxIndex + 1) * (lenseIndex + 1) * lense.focalLength
+		}
+	}
 
-	return 0
+	return focusingPower
 }
 
 func getBoxes(parsed []string) map[int][]Lense {
