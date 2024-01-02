@@ -77,6 +77,7 @@ func part1(input string) int {
 	startingBeams = append(startingBeams, beam)
 
 	energisedTiles := make(map[string]bool)
+	floop := 0
 	for len(startingBeams) > 0 {
 		fmt.Println("-------")
 		fmt.Println("starting beams", startingBeams)
@@ -86,7 +87,8 @@ func part1(input string) int {
 		stop := false
 
 		for currentBeam.row >= 0 && currentBeam.row < rowCount &&
-			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop {
+			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop && floop < 10 {
+			floop++
 			currentTile := parsed[currentBeam.row][currentBeam.column]
 			tileIndex := strings.Join([]string{strconv.Itoa(currentBeam.row), strconv.Itoa(currentBeam.column)}, ",")
 			energisedTiles[tileIndex] = true
@@ -105,8 +107,10 @@ func part1(input string) int {
 					currentBeam.row--
 					nextDirection = currentBeam.direction
 				case upMirror:
+					currentBeam.column++
 					nextDirection = "E"
 				case downMirror:
+					currentBeam.column--
 					nextDirection = "W"
 				case horizSplit:
 					stop = true
@@ -118,8 +122,10 @@ func part1(input string) int {
 					currentBeam.column++
 					nextDirection = currentBeam.direction
 				case upMirror:
+					currentBeam.row--
 					nextDirection = "N"
 				case downMirror:
+					currentBeam.row++
 					nextDirection = "S"
 				case vertSplit:
 					stop = true
@@ -132,8 +138,10 @@ func part1(input string) int {
 					currentBeam.row++
 					nextDirection = currentBeam.direction
 				case upMirror:
+					currentBeam.column--
 					nextDirection = "W"
 				case downMirror:
+					currentBeam.column++
 					nextDirection = "E"
 				case horizSplit:
 					stop = true
@@ -145,8 +153,10 @@ func part1(input string) int {
 					currentBeam.column--
 					nextDirection = currentBeam.direction
 				case upMirror:
+					currentBeam.column++
 					nextDirection = "S"
 				case downMirror:
+					currentBeam.column--
 					nextDirection = "N"
 				case vertSplit:
 					stop = true
