@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -186,7 +187,51 @@ func splitBeam(currentBeam Beam, startingBeams []Beam, directions []string) []Be
 }
 
 func part2(input string) int {
-	return 0
+	parsed := parseInput(input)
+	_ = parsed
+
+	rowCount := len(parsed)
+	columnCount := len(parsed[0])
+	energisedCount := make([]int, 0)
+
+	for i := 0; i < rowCount; i++ {
+		leftBeam := Beam{
+			row:       i,
+			column:    0,
+			direction: "E",
+		}
+		leftCount := getEnergisedCount(parsed, leftBeam)
+		energisedCount = append(energisedCount, leftCount)
+
+		rightBeam := Beam{
+			row:       i,
+			column:    columnCount - 1,
+			direction: "W",
+		}
+		rightCount := getEnergisedCount(parsed, rightBeam)
+		energisedCount = append(energisedCount, rightCount)
+	}
+
+	for i := 0; i < columnCount; i++ {
+		topBeam := Beam{
+			row:       0,
+			column:    i,
+			direction: "S",
+		}
+		topCount := getEnergisedCount(parsed, topBeam)
+		energisedCount = append(energisedCount, topCount)
+
+		bottomBeam := Beam{
+			row:       rowCount - 1,
+			column:    i,
+			direction: "N",
+		}
+		bottomCount := getEnergisedCount(parsed, bottomBeam)
+		energisedCount = append(energisedCount, bottomCount)
+
+	}
+
+	return slices.Max(energisedCount)
 }
 
 func parseInput(input string) (ans [][]string) {
