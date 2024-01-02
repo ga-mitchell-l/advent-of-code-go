@@ -63,45 +63,52 @@ type Beam struct {
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	_ = parsed
-
+	// copySlice := util.CopySlice(parsed)
 	rowCount := len(parsed)
 	columnCount := len(parsed[0])
 
+	startingBeams := make([]Beam, 0)
 	beam := Beam{
 		row:       0,
 		column:    0,
 		direction: "E",
 	}
-	startingBeams := make([]Beam, 0)
 	startingBeams = append(startingBeams, beam)
 
 	energisedTiles := make(map[string]bool)
+	previousBeams := make(map[string]bool)
 	floop := 0
 	for len(startingBeams) > 0 {
-		fmt.Println("-------")
-		fmt.Println("starting beams", startingBeams)
+		// fmt.Println("-------")
+		// fmt.Println("starting beams", startingBeams)
 		currentBeam := startingBeams[0]
 		startingBeams = startingBeams[1:]
+		beamIndex := strconv.Itoa(currentBeam.row) + strconv.Itoa(currentBeam.column) + currentBeam.direction
 
-		stop := false
+		stop := previousBeams[beamIndex] // prevent infinite loops
+		previousBeams[beamIndex] = true
 
 		for currentBeam.row >= 0 && currentBeam.row < rowCount &&
-			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop && floop < 10 {
+			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop && floop < 100 {
 			floop++
+			// fmt.Println("floop:", floop)
 			currentTile := parsed[currentBeam.row][currentBeam.column]
 			tileIndex := strings.Join([]string{strconv.Itoa(currentBeam.row), strconv.Itoa(currentBeam.column)}, ",")
 			energisedTiles[tileIndex] = true
 
-			fmt.Println("- - - ")
-			fmt.Println("tile index:", tileIndex)
-			fmt.Println("current tile:", currentTile)
-			fmt.Println("current direction", currentBeam.direction)
+			// fmt.Println("- - - ")
+			// fmt.Println("tile index:", tileIndex)
+			// fmt.Println("current tile:", currentTile)
+			// fmt.Println("current direction", currentBeam.direction)
+			// copySlice[currentBeam.row][currentBeam.column] = "#"
 
 			nextDirection := ""
 			previousBeam := currentBeam
 			switch currentBeam.direction {
 			case "N":
+				// if currentTile == emptySpace {
+				// 	copySlice[currentBeam.row][currentBeam.column] = "^"
+				// }
 				switch currentTile {
 				case emptySpace, vertSplit:
 					currentBeam.row--
@@ -115,8 +122,13 @@ func part1(input string) int {
 				case horizSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"E", "W"})
+					// fmt.Println("north split")
 				}
 			case "E":
+				// if currentTile == emptySpace {
+				// 	copySlice[currentBeam.row][currentBeam.column] = ">"
+				// }
+
 				switch currentTile {
 				case emptySpace, horizSplit:
 					currentBeam.column++
@@ -130,9 +142,13 @@ func part1(input string) int {
 				case vertSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"N", "S"})
-					fmt.Println("east split")
+					// fmt.Println("east split")
 				}
 			case "S":
+				// if currentTile == emptySpace {
+				// 	copySlice[currentBeam.row][currentBeam.column] = "v"
+				// }
+
 				switch currentTile {
 				case emptySpace, vertSplit:
 					currentBeam.row++
@@ -146,21 +162,27 @@ func part1(input string) int {
 				case horizSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"E", "W"})
+					// fmt.Println("south split")
 				}
 			case "W":
+				// if currentTile == emptySpace {
+				// 	copySlice[currentBeam.row][currentBeam.column] = "<"
+				// }
+
 				switch currentTile {
 				case emptySpace, horizSplit:
 					currentBeam.column--
 					nextDirection = currentBeam.direction
 				case upMirror:
-					currentBeam.column++
+					currentBeam.row++
 					nextDirection = "S"
 				case downMirror:
-					currentBeam.column--
+					currentBeam.row--
 					nextDirection = "N"
 				case vertSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"N", "S"})
+					// fmt.Println("west split")
 				}
 			}
 
@@ -169,11 +191,14 @@ func part1(input string) int {
 		}
 
 		if !stop {
-			fmt.Println("reached edge")
+			// fmt.Println("reached edge")
 		}
 	}
 
-	fmt.Println(energisedTiles)
+	// for _, row := range copySlice {
+	// 	fmt.Println(row)
+
+	// }
 
 	return len(energisedTiles)
 }
