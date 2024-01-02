@@ -77,10 +77,7 @@ func part1(input string) int {
 
 	energisedTiles := make(map[string]bool)
 	previousBeams := make(map[string]bool)
-	floop := 0
 	for len(startingBeams) > 0 {
-		// fmt.Println("-------")
-		// fmt.Println("starting beams", startingBeams)
 		currentBeam := startingBeams[0]
 		startingBeams = startingBeams[1:]
 		beamIndex := strconv.Itoa(currentBeam.row) + strconv.Itoa(currentBeam.column) + currentBeam.direction
@@ -89,8 +86,7 @@ func part1(input string) int {
 		previousBeams[beamIndex] = true
 
 		for currentBeam.row >= 0 && currentBeam.row < rowCount &&
-			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop && floop < 100 {
-			floop++
+			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop {
 			// fmt.Println("floop:", floop)
 			currentTile := parsed[currentBeam.row][currentBeam.column]
 			tileIndex := strings.Join([]string{strconv.Itoa(currentBeam.row), strconv.Itoa(currentBeam.column)}, ",")
