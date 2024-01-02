@@ -87,24 +87,14 @@ func part1(input string) int {
 
 		for currentBeam.row >= 0 && currentBeam.row < rowCount &&
 			currentBeam.column >= 0 && currentBeam.column < columnCount && !stop {
-			// fmt.Println("floop:", floop)
 			currentTile := parsed[currentBeam.row][currentBeam.column]
 			tileIndex := strings.Join([]string{strconv.Itoa(currentBeam.row), strconv.Itoa(currentBeam.column)}, ",")
 			energisedTiles[tileIndex] = true
-
-			// fmt.Println("- - - ")
-			// fmt.Println("tile index:", tileIndex)
-			// fmt.Println("current tile:", currentTile)
-			// fmt.Println("current direction", currentBeam.direction)
-			// copySlice[currentBeam.row][currentBeam.column] = "#"
 
 			nextDirection := ""
 			previousBeam := currentBeam
 			switch currentBeam.direction {
 			case "N":
-				// if currentTile == emptySpace {
-				// 	copySlice[currentBeam.row][currentBeam.column] = "^"
-				// }
 				switch currentTile {
 				case emptySpace, vertSplit:
 					currentBeam.row--
@@ -118,13 +108,8 @@ func part1(input string) int {
 				case horizSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"E", "W"})
-					// fmt.Println("north split")
 				}
 			case "E":
-				// if currentTile == emptySpace {
-				// 	copySlice[currentBeam.row][currentBeam.column] = ">"
-				// }
-
 				switch currentTile {
 				case emptySpace, horizSplit:
 					currentBeam.column++
@@ -138,13 +123,8 @@ func part1(input string) int {
 				case vertSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"N", "S"})
-					// fmt.Println("east split")
 				}
 			case "S":
-				// if currentTile == emptySpace {
-				// 	copySlice[currentBeam.row][currentBeam.column] = "v"
-				// }
-
 				switch currentTile {
 				case emptySpace, vertSplit:
 					currentBeam.row++
@@ -158,13 +138,8 @@ func part1(input string) int {
 				case horizSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"E", "W"})
-					// fmt.Println("south split")
 				}
 			case "W":
-				// if currentTile == emptySpace {
-				// 	copySlice[currentBeam.row][currentBeam.column] = "<"
-				// }
-
 				switch currentTile {
 				case emptySpace, horizSplit:
 					currentBeam.column--
@@ -178,23 +153,13 @@ func part1(input string) int {
 				case vertSplit:
 					stop = true
 					startingBeams = splitBeam(previousBeam, startingBeams, []string{"N", "S"})
-					// fmt.Println("west split")
 				}
 			}
 
 			currentBeam.direction = nextDirection
 
 		}
-
-		if !stop {
-			// fmt.Println("reached edge")
-		}
 	}
-
-	// for _, row := range copySlice {
-	// 	fmt.Println(row)
-
-	// }
 
 	return len(energisedTiles)
 }
