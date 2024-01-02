@@ -63,16 +63,20 @@ type Beam struct {
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	// copySlice := util.CopySlice(parsed)
-	rowCount := len(parsed)
-	columnCount := len(parsed[0])
 
-	startingBeams := make([]Beam, 0)
-	beam := Beam{
+	startingBeam := Beam{
 		row:       0,
 		column:    0,
 		direction: "E",
 	}
+
+	return getEnergisedCount(parsed, startingBeam)
+}
+
+func getEnergisedCount(parsed [][]string, beam Beam) int {
+	rowCount := len(parsed)
+	columnCount := len(parsed[0])
+	startingBeams := make([]Beam, 0)
 	startingBeams = append(startingBeams, beam)
 
 	energisedTiles := make(map[string]bool)
@@ -82,7 +86,7 @@ func part1(input string) int {
 		startingBeams = startingBeams[1:]
 		beamIndex := strconv.Itoa(currentBeam.row) + strconv.Itoa(currentBeam.column) + currentBeam.direction
 
-		stop := previousBeams[beamIndex] // prevent infinite loops
+		stop := previousBeams[beamIndex]
 		previousBeams[beamIndex] = true
 
 		for currentBeam.row >= 0 && currentBeam.row < rowCount &&
@@ -161,7 +165,8 @@ func part1(input string) int {
 		}
 	}
 
-	return len(energisedTiles)
+	energisedCount := len(energisedTiles)
+	return energisedCount
 }
 
 func splitBeam(currentBeam Beam, startingBeams []Beam, directions []string) []Beam {
