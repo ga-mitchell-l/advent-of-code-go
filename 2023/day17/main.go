@@ -1,10 +1,12 @@
 package main
 
 import (
-	"advent-of-code-go/cast"
 	_ "embed"
 	"flag"
 	"fmt"
+	"math"
+	"slices"
+	"strconv"
 	"strings"
 
 	"advent-of-code-go/util"
@@ -53,20 +55,122 @@ func main() {
 	}
 }
 
+type Block struct {
+	row    int
+	column int
+	value  int
+	dist   float64
+}
+
+var minDistBlockFunc = func(A, B Block) int {
+	if A.dist < B.dist {
+		return -1
+	} else if A.dist > B.dist {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+func GetBlockSliceIndex(queue []Block, row int, column int) (ret int) {
+	for index, value := range queue {
+		if row == value.row && column == value.column {
+			return index
+		}
+	}
+	return -1
+}
+
 func part1(input string) int {
 	parsed := parseInput(input)
 	_ = parsed
 
-	return 0
+	// Because it is difficult to keep the top-heavy crucible going in a straight line for very long,
+	// it can move at most three blocks in a single direction before it must turn 90 degrees left or right.
+	// The crucible also can't reverse direction;
+	//after entering each city block, it may only turn left, continue straight, or turn right.
+
+	maxBlockMoves := 3
+	_ = maxBlockMoves
+	maxRows := len(parsed)
+	maxCols := len(parsed[0])
+	dist, queue := getDistQueue(parsed)
+
+	neighbourPositions := [][]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}}
+	for len(queue) > 0 {
+		// first run through, this block is the source block
+		minDistBlock := slices.MinFunc[[]Block, Block](queue, minDistBlockFunc)
+		fmt.Println("min:", minDistBlock)
+
+		// remove current block from queue
+		minQueueIndex := GetBlockSliceIndex(queue, minDistBlock.row, minDistBlock.column)
+		queue = append(queue[:minQueueIndex], queue[minQueueIndex+1:]...)
+
+		// for each neighbour block
+		for _, position := range neighbourPositions {
+			neighbourRow := minDistBlock.row + position[0]
+			neighbourCol := minDistBlock.column + position[1]
+			neighbourDistIndex := GetBlockSliceIndex(dist, neighbourRow, neighbourCol)
+			if neighbourDistIndex == -1 {
+				// check neighbour exists
+				continue
+			}
+
+			neighbour := dist[neighbourDistIndex]
+			alt := minDistBlock.dist + float64(neighbour.value)
+
+			if alt < neighbour.dist {
+				neighbourQueueIndex := GetBlockSliceIndex(queue, neighbourRow, neighbourCol)
+				if neighbourQueueIndex > -1 {
+					queue[neighbourQueueIndex].dist = alt
+				}
+				dist[neighbourDistIndex].dist = alt
+			}
+		}
+
+	}
+
+	fmt.Println(foo)
+	fmt.Println(dist)
+	fmt.Println(queue)
+
+	endPointIndex := GetBlockSliceIndex(dist, maxRows-1, maxCols-1)
+	endPoint := dist[endPointIndex]
+
+	return int(endPoint.dist)
+}
+
+func getDistQueue(parsed [][]string) ([]Block, []Block) {
+	dist := make([]Block, 0)
+	queue := make([]Block, 0)
+
+	for rowIndex, row := range parsed {
+		for columnIndex, blockValue := range row {
+			distValue := math.Inf(1)
+			intBlockVal, _ := strconv.Atoi(blockValue)
+			if rowIndex == 0 && columnIndex == 0 {
+				distValue = 0
+			}
+			block := Block{
+				row:    rowIndex,
+				column: columnIndex,
+				dist:   distValue,
+				value:  intBlockVal,
+			}
+			dist = append(dist, block)
+			queue = append(queue, block)
+		}
+	}
+	return dist, queue
 }
 
 func part2(input string) int {
 	return 0
 }
 
-func parseInput(input string) (ans []int) {
+func parseInput(input string) (ans [][]string) {
 	for _, line := range strings.Split(input, "\n") {
-		ans = append(ans, cast.ToInt(line))
+		ans = append(ans, strings.Split(line, ""))
 	}
 	return ans
 }
