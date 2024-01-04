@@ -130,7 +130,6 @@ func part1(input string) int {
 
 	}
 
-	fmt.Println(foo)
 	fmt.Println(dist)
 	fmt.Println(queue)
 
