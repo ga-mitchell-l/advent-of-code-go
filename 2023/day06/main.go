@@ -96,18 +96,16 @@ func parseInput(input string) (times []int, distances []int) {
 }
 
 func getNumberOfWaysToWin(raceTime int, raceDistance int) (numberOfWays int) {
-	positive, negative := QuadraticFormula(raceTime, raceDistance+1)
-	minChargeTime := math.Ceil(math.Min(positive, negative))
-	maxChargeTime := math.Floor(math.Max(positive, negative))
-	numberOfWays = int(maxChargeTime) - int(minChargeTime) + 1
+	positive, negative := QuadraticFormula(1, -float64(raceTime), float64(raceDistance+1))
+	numberOfWays = int(math.Floor(positive)) - int(math.Ceil(negative)) + 1
 
 	return numberOfWays
 }
 
-func QuadraticFormula(time int, distance int) (positive float64, negative float64) {
-	square := time*time + -(4 * distance)
-	squareRoot := math.Sqrt(float64(square))
-	positive = (-float64(time) + squareRoot) / -2
-	negative = (-float64(time) - squareRoot) / -2
-	return positive, negative
+func QuadraticFormula(a, b, c float64) (positive float64, negative float64) {
+	square := b*b - (4 * a * c)
+	squareRoot := math.Sqrt(square)
+	positive = (-b + squareRoot) / (2 * a)
+	negative = (-b - squareRoot) / (2 * a)
+	return math.Max(positive, negative), math.Min(positive, negative)
 }

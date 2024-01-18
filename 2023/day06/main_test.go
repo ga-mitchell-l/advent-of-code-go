@@ -33,3 +33,31 @@ Distance:   219   1012   1365   1089`
 	}
 
 }
+
+func TestQuadraticFormula2(t *testing.T) {
+	a, b, c := 1.0, -3.0, 2.0
+	p, n := QuadraticFormula(a, b, c)
+
+	expectedp := 2.0
+	expectedn := 1.0
+
+	if expectedp != p {
+		t.Errorf("p was incorrect: got %f, want %f", p, expectedp)
+	}
+
+	if expectedn != n {
+		t.Errorf("n was incorrect: got %f, want %f", n, expectedn)
+	}
+}
+
+func TestGetNumberOfWaysToWin(t *testing.T) {
+	time := 7
+	distance := 9
+
+	result := getNumberOfWaysToWin(time, distance)
+	expectedResult := 4
+
+	if result != expectedResult {
+		t.Errorf("result was incorrect: got %d, wanted %d", result, expectedResult)
+	}
+}
