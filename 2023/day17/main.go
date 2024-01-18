@@ -90,7 +90,6 @@ func GetBlockSliceIndex(queue []Block, row int, column int) (ret int) {
 
 func part1(input string) int {
 	parsed := parseInput(input)
-	fmt.Println(parsed)
 
 	// Because it is difficult to keep the top-heavy crucible going in a straight line for very long,
 	// it can move at most three blocks in a single direction before it must turn 90 degrees left or right.
@@ -108,45 +107,57 @@ func part1(input string) int {
 		{rowDiff: 0, colDiff: -1, direction: "W"},
 	}
 
+	debugRow := 0
+	debugColumn := 2
+
 	floop := 0
 	for len(queue) > 0 && floop < 1000 {
 		floop++
 		// first run through, this block is the source block
 		minDistBlock := slices.MinFunc[[]Block, Block](queue, minDistBlockFunc)
 
-		fmt.Println("------")
-		fmt.Println("row:", minDistBlock.row, "col:", minDistBlock.column, "val:", minDistBlock.value, "dist:", minDistBlock.dist, "hist:", minDistBlock.history)
-		fmt.Println("- - - - ")
+		if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+			fmt.Println("------")
+			fmt.Println("row:", minDistBlock.row, "col:", minDistBlock.column, "val:", minDistBlock.value, "dist:", minDistBlock.dist, "hist:", minDistBlock.history)
+			fmt.Println("- - - - ")
+		}
 
 		// remove current block from queue
 		minQueueIndex := GetBlockSliceIndex(queue, minDistBlock.row, minDistBlock.column)
 		queue = append(queue[:minQueueIndex], queue[minQueueIndex+1:]...)
 		history := minDistBlock.history
 		skipDirection := ""
-		if len(history) > 1 {
+		if len(history) > 2 {
 			i := history[len(history)-1]
 			j := history[len(history)-2]
+			k := history[len(history)-3]
 
-			if i == j {
+			if i == j && j == k {
 				skipDirection = i
 			}
 		}
 
 		// for each neighbour block
 		for _, position := range neighbourPositions {
-			fmt.Println("position:", position)
+			if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+				fmt.Println("position:", position)
+			}
 
 			// check we are not reversing direction
 			if position.direction == getReverseDirection(history) {
-				fmt.Println("reverse direction :C")
-				fmt.Println("- - - -")
+				if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+					fmt.Println("reverse direction :C")
+					fmt.Println("- - - -")
+				}
 				continue
 			}
 
 			// check we haven't been going in the same direction for too long
 			if position.direction == skipDirection {
-				fmt.Println("too far same direction :C")
-				fmt.Println("- - - -")
+				if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+					fmt.Println("too far same direction :C")
+					fmt.Println("- - - -")
+				}
 				continue
 			}
 
@@ -155,17 +166,27 @@ func part1(input string) int {
 			neighbourCol := minDistBlock.column + position.colDiff
 			neighbourDistIndex := GetBlockSliceIndex(dist, neighbourRow, neighbourCol)
 			if neighbourDistIndex == -1 {
-				fmt.Println("does not exist :C")
-				fmt.Println("- - - -")
+				if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+					fmt.Println("does not exist :C")
+					fmt.Println("- - - -")
+				}
 				continue
 			}
 
 			neighbourDist := dist[neighbourDistIndex]
-			fmt.Println("neighbour:", neighbourDist)
+			if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+				fmt.Println("neighbour:", neighbourDist)
+			}
 			alt := minDistBlock.dist + float64(neighbourDist.value)
+			if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+				fmt.Println("alt:", alt)
+			}
 
 			if alt < neighbourDist.dist {
-				fmt.Println("updating dist:", alt)
+				if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+					fmt.Println("updating dist")
+					fmt.Println("new history of neighbour:", append(history, position.direction))
+				}
 				neighbourQueueIndex := GetBlockSliceIndex(queue, neighbourRow, neighbourCol)
 				if neighbourQueueIndex > -1 {
 					queue[neighbourQueueIndex].dist = alt
@@ -173,8 +194,14 @@ func part1(input string) int {
 				}
 				dist[neighbourDistIndex].dist = alt
 				dist[neighbourDistIndex].history = append(history, position.direction)
+			} else {
+				if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+					fmt.Println("dist not changing")
+				}
 			}
-			fmt.Println("- - - -")
+			if debugRow == minDistBlock.row && debugColumn == minDistBlock.column {
+				fmt.Println("- - - -")
+			}
 		}
 
 	}
@@ -182,6 +209,11 @@ func part1(input string) int {
 	endPointIndex := GetBlockSliceIndex(dist, maxRows-1, maxCols-1)
 	endPoint := dist[endPointIndex]
 	fmt.Println(endPoint.history)
+
+	fmt.Println(dist[GetBlockSliceIndex(dist, 0, 0)])
+	fmt.Println(dist[GetBlockSliceIndex(dist, 0, 1)])
+	fmt.Println(dist[GetBlockSliceIndex(dist, 0, 2)])
+	fmt.Println(dist[GetBlockSliceIndex(dist, 0, 3)])
 
 	return int(endPoint.dist)
 }
@@ -206,28 +238,45 @@ func getReverseDirection(s []string) string {
 func getDistQueue(parsed [][]string) ([]Block, []Block) {
 	dist := make([]Block, 0)
 	queue := make([]Block, 0)
-	firstValue, _ := strconv.Atoi(parsed[0][0])
+	// firstValue, _ := strconv.Atoi(parsed[0][0])
 
 	for rowIndex, row := range parsed {
 		for columnIndex, blockValue := range row {
-			distValue := math.Inf(1)
 			intBlockVal, _ := strconv.Atoi(blockValue)
-			history := make([]string, 0)
-			if rowIndex == 0 && columnIndex == 0 {
-				distValue = float64(firstValue)
-			}
+			// if rowIndex == 0 && columnIndex == 0 {
+			// 	distValue = float64(firstValue)
+			// }
 			block := Block{
 				row:     rowIndex,
 				column:  columnIndex,
-				dist:    distValue,
+				dist:    math.Inf(1),
 				value:   intBlockVal,
-				history: history,
+				history: make([]string, 0),
 			}
 
 			dist = append(dist, block)
 			queue = append(queue, block)
 		}
 	}
+
+	up := Block{
+		row:     -1,
+		column:  0,
+		dist:    0,
+		value:   0,
+		history: make([]string, 0),
+	}
+	left := Block{
+		row:     0,
+		column:  -1,
+		dist:    0,
+		value:   0,
+		history: make([]string, 0),
+	}
+
+	dist = append(dist, up, left)
+	queue = append(queue, up, left)
+
 	return dist, queue
 }
 
