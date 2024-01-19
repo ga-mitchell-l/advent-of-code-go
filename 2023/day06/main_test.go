@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	_ "embed"
+	"testing"
+)
 
 func TestParseInput(t *testing.T) {
 	input := `Time:        40     81     77     72
@@ -34,22 +37,6 @@ Distance:   219   1012   1365   1089`
 
 }
 
-func TestQuadraticFormula2(t *testing.T) {
-	a, b, c := 1.0, -3.0, 2.0
-	p, n := QuadraticFormula(a, b, c)
-
-	expectedp := 2.0
-	expectedn := 1.0
-
-	if expectedp != p {
-		t.Errorf("p was incorrect: got %f, want %f", p, expectedp)
-	}
-
-	if expectedn != n {
-		t.Errorf("n was incorrect: got %f, want %f", n, expectedn)
-	}
-}
-
 func TestGetNumberOfWaysToWin(t *testing.T) {
 	time := 7
 	distance := 9
@@ -59,5 +46,32 @@ func TestGetNumberOfWaysToWin(t *testing.T) {
 
 	if result != expectedResult {
 		t.Errorf("result was incorrect: got %d, wanted %d", result, expectedResult)
+	}
+}
+
+func TestQuadraticFormula(t *testing.T) {
+	type args struct {
+		a float64
+		b float64
+		c float64
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantPositive float64
+		wantNegative float64
+	}{
+		{name: "foo", args: args{a: 1.0, b: -3.0, c: 2.0}, wantPositive: 2, wantNegative: 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotPositive, gotNegative := QuadraticFormula(tt.args.a, tt.args.b, tt.args.c)
+			if gotPositive != tt.wantPositive {
+				t.Errorf("QuadraticFormula() gotPositive = %v, want %v", gotPositive, tt.wantPositive)
+			}
+			if gotNegative != tt.wantNegative {
+				t.Errorf("QuadraticFormula() gotNegative = %v, want %v", gotNegative, tt.wantNegative)
+			}
+		})
 	}
 }

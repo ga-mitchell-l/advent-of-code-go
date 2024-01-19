@@ -238,14 +238,10 @@ func getReverseDirection(s []string) string {
 func getDistQueue(parsed [][]string) ([]Block, []Block) {
 	dist := make([]Block, 0)
 	queue := make([]Block, 0)
-	// firstValue, _ := strconv.Atoi(parsed[0][0])
 
 	for rowIndex, row := range parsed {
 		for columnIndex, blockValue := range row {
 			intBlockVal, _ := strconv.Atoi(blockValue)
-			// if rowIndex == 0 && columnIndex == 0 {
-			// 	distValue = float64(firstValue)
-			// }
 			block := Block{
 				row:     rowIndex,
 				column:  columnIndex,
