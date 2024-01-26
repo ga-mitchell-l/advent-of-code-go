@@ -23,11 +23,7 @@ Distance:   219   1012   1365   1089`
 		assert.Equal(t, gottt[i], wanttt[i], "times incorrect at index %d", i)
 	}
 
-	assert.Equal(t, len(gotdd), len(wantdd), "distances 
-	
-	
-	 
-	    incorrect length")
+	assert.Equal(t, len(gotdd), len(wantdd), "distances incorrect length")
 
 	for i := 0; i < len(gotdd); i++ {
 		assert.Equal(t, gotdd[i], wantdd[i], "distances incorrect at index %d", i)
